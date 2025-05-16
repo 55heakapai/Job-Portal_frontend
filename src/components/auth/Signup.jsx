@@ -13,28 +13,30 @@ import { setLoading } from '@/redux/authSlice'
 import { Loader2 } from 'lucide-react'
 
 const Signup = () => {
-
     const [input, setInput] = useState({
         fullname: "",
         email: "",
         phoneNumber: "",
         password: "",
         role: "",
-        file: ""
+        file: null
     });
-    const {loading,user} = useSelector(store=>store.auth);
+
+    const { loading, user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
     }
+
     const changeFileHandler = (e) => {
-        setInput({ ...input, file: e.target.files?.[0] });
+        setInput({ ...input, file: e.target.files?.[0] || null });
     }
+
     const submitHandler = async (e) => {
         e.preventDefault();
-        const formData = new FormData();    //formdata object
+        const formData = new FormData();
         formData.append("fullname", input.fullname);
         formData.append("email", input.email);
         formData.append("phoneNumber", input.phoneNumber);
@@ -55,18 +57,19 @@ const Signup = () => {
                 toast.success(res.data.message);
             }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response.data.message);
-        } finally{
+            console.error(error);
+            toast.error(error.response?.data?.message || "Signup failed.");
+        } finally {
             dispatch(setLoading(false));
         }
     }
 
-    useEffect(()=>{
-        if(user){
+    useEffect(() => {
+        if (user) {
             navigate("/");
         }
-    },[])
+    }, [user, navigate]);
+
     return (
         <div>
             <Navbar />
@@ -74,73 +77,85 @@ const Signup = () => {
                 <form onSubmit={submitHandler} className='w-1/2 border border-gray-200 rounded-md p-4 my-10'>
                     <h1 className='font-bold text-xl mb-5'>Sign Up</h1>
                     <div className='my-2'>
-                        <Label>Full Name</Label>
+                        <Label htmlFor="fullname">Full Name</Label>
                         <Input
+                            id="fullname"
                             type="text"
                             value={input.fullname}
                             name="fullname"
                             onChange={changeEventHandler}
-                            placeholder="patel"
+                            placeholder="user"
+                            required
                         />
                     </div>
                     <div className='my-2'>
-                        <Label>Email</Label>
+                        <Label htmlFor="email">Email</Label>
                         <Input
+                            id="email"
                             type="email"
                             value={input.email}
                             name="email"
                             onChange={changeEventHandler}
-                            placeholder="patel@gmail.com"
+                            placeholder="user@gmail.com"
+                            required
                         />
                     </div>
                     <div className='my-2'>
-                        <Label>Phone Number</Label>
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
                         <Input
+                            id="phoneNumber"
                             type="text"
                             value={input.phoneNumber}
                             name="phoneNumber"
                             onChange={changeEventHandler}
-                            placeholder="8080808080"
+                            placeholder="XXXXXXXXXX"
+                            required
                         />
                     </div>
                     <div className='my-2'>
-                        <Label>Password</Label>
+                        <Label htmlFor="password">Password</Label>
                         <Input
+                            id="password"
                             type="password"
                             value={input.password}
                             name="password"
                             onChange={changeEventHandler}
-                            placeholder="patel@gmail.com"
+                            placeholder="user@123"
+                            required
                         />
                     </div>
-                    <div className='flex items-center justify-between'>
+                    <div className='flex items-center justify-between flex-wrap'>
                         <RadioGroup className="flex items-center gap-4 my-5">
                             <div className="flex items-center space-x-2">
                                 <Input
                                     type="radio"
+                                    id="student"
                                     name="role"
                                     value="student"
                                     checked={input.role === 'student'}
                                     onChange={changeEventHandler}
                                     className="cursor-pointer"
+                                    required
                                 />
-                                <Label htmlFor="r1">Student</Label>
+                                <Label htmlFor="student">Student</Label>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <Input
                                     type="radio"
+                                    id="recruiter"
                                     name="role"
                                     value="recruiter"
                                     checked={input.role === 'recruiter'}
                                     onChange={changeEventHandler}
                                     className="cursor-pointer"
                                 />
-                                <Label htmlFor="r2">Recruiter</Label>
+                                <Label htmlFor="recruiter">Recruiter</Label>
                             </div>
                         </RadioGroup>
                         <div className='flex items-center gap-2'>
-                            <Label>Profile</Label>
+                            <Label htmlFor="file">Profile</Label>
                             <Input
+                                id="file"
                                 accept="image/*"
                                 type="file"
                                 onChange={changeFileHandler}
@@ -149,7 +164,13 @@ const Signup = () => {
                         </div>
                     </div>
                     {
-                        loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Signup</Button>
+                        loading ? (
+                            <Button className="w-full my-4" disabled>
+                                <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait
+                            </Button>
+                        ) : (
+                            <Button type="submit" className="w-full my-4">Signup</Button>
+                        )
                     }
                     <span className='text-sm'>Already have an account? <Link to="/login" className='text-blue-600'>Login</Link></span>
                 </form>
